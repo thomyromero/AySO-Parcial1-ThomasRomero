@@ -1,69 +1,43 @@
+#!/bin/bash
 
-# Mostrar el estado actual de los discos
-lsblk > lsblk_output.txt
 
-# Dividir el disco en 4 particiones
-# Crear la tabla de particiones
-(
-echo o # Crear nueva tabla de particiones
-echo n # Nueva partición
-echo p # Primaria
-echo 1 # Número de partición
-echo   # Primer sector (predeterminado)
-echo +2G # Tamaño de la partición 1
-echo n # Nueva partición
-echo p # Primaria
-echo 2 # Número de partición
-echo   # Primer sector (predeterminado)
-echo +2G # Tamaño de la partición 2
-echo n # Nueva partición
-echo p # Primaria
-echo 3 # Número de partición
-echo   # Primer sector (predeterminado)
-echo +2G # Tamaño de la partición 3
-echo n # Nueva partición
-echo e # Extendida
-echo 4 # Número de partición
-echo   # Primer sector (predeterminado)
-echo   # Último sector (predeterminado)
-echo n # Nueva partición dentro de la extendida
-echo l # Lógica
-echo   # Número de partición (predeterminado)
-echo   # Primer sector (predeterminado)
-echo +4G # Tamaño de la partición lógica
-echo w # Escribir los cambios
-) | fdisk /dev/sdX
+echo "Punto B - Terminado"
 
-# Formatear las particiones con ext4
-mkfs.ext4 /dev/sdX1
-mkfs.ext4 /dev/sdX2
-mkfs.ext4 /dev/sdX3
-mkfs.ext4 /dev/sdX4
 
-# Crear los puntos de montaje
-mkdir -p /mnt/part1
-mkdir -p /mnt/part2
-mkdir -p /mnt/part3
-mkdir -p /mnt/part4
+DISCO="/dev/sdc"
 
-# Montar las particiones
-mount /dev/sdX1 /mnt/part1
-mount /dev/sdX2 /mnt/part2
-mount /dev/sdX3 /mnt/part3
-mount /dev/sdX4 /mnt/part4
+TAMANO_PARTICION="1G" 
 
-echo "Particiones creadas y montadas correctamente."
+DIRECTORIO_MONTAJE="/mnt"
 
-#3. Modificar el script
+lsblk $DISCO > disco.txt
+echo "Información del disco guardada en disco.txt"
 
-Asegúrate de reemplazar /dev/sdX por el identificador correcto de tu disco.
-Guarda y cierra el archivo (CTRL + O, Enter, CTRL + X si usas nano).
+sudo fdisk $DISCO << EOF
+n
+p
+1
+$TAMANO_PARTICION
+n
+p
+2
+$TAMANO_PARTICION
+n
+p
+3
+$TAMANO_PARTICION
+n
+e
+4
+w
+EOF
 
-#4. Hacer el script ejecutable
+for i in {1..4}; do
+  sudo mkfs.ext4 $DISCO$i
+done
 
-chmod +x puntb.sh
-
-#5. Ejecutar el script
-
-sudo ./puntb.sh
-
+sudo mkdir -p $DIRECTORIO_MONTAJE/{parti1,parti2,parti3,parti4}
+sudo mount $DISCO1 $DIRECTORIO_MONTAJE/parti1
+sudo mount $DISCO2 $DIRECTORIO_MONTAJE/parti2
+sudo mount $DISCO3 $DIRECTORIO_MONTAJE/parti3
+sudo mount $DISCO4 $DIRECTORIO_MONTAJE/parti4
